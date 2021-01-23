@@ -16,6 +16,26 @@ void main() {
   new Game()..run();
 }
 
+class Cell {
+
+  double x = 0, y = 0, size = 100, rotation = 0;
+
+  Cell(this.x, this.y, this.size, {this.rotation});
+
+  draw(String color) {
+    var tx = x - size / 2;
+    var ty = y - size / 2;
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx..fillStyle = color
+      ..strokeStyle = "red";
+    ctx.fillRect(tx, ty, size, size);
+    ctx.rotate(-rotation);
+    ctx.translate(-x, -y);
+  }
+}
+
+
 void drawCell(Point coords, String color) {
   ctx..fillStyle = color
     ..strokeStyle = "white";
@@ -44,6 +64,7 @@ class Game {
 
   Snake _snake;
   Point _food;
+  Cell _cell;
 
   Game() {
     _rightEdgeX = canvas.width ~/ CELL_SIZE;
@@ -52,7 +73,10 @@ class Game {
     init();
   }
 
+  void a(int a, int b, {int c = 2, int d = 3}){}
+
   void init() {
+    _cell = new Cell(100, 100, 100, rotation : (pi / 180 * 45));
     _snake = new Snake();
     _food = _randomPoint();
   }
@@ -90,6 +114,7 @@ class Game {
       drawCell(_food, "blue");
       _snake.update();
       _checkForCollisions();
+      _cell.draw("red");
     }
 
     // keep looping
@@ -168,6 +193,7 @@ class Snake {
 }
 
 class Keyboard {
+  //TODO add second state
   HashMap<int, num> _keys = new HashMap<int, num>();
 
   Keyboard() {
