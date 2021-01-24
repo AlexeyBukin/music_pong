@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 import 'dart:collection';
+import 'coroutine.dart';
 import 'stage.dart';
+import 'game_timer.dart';
 
-// typedef Coroutine = Pair<Function(num delta, Object o), dynamic>;
 CanvasElement canvas;
 CanvasRenderingContext2D ctx;
 
@@ -13,27 +14,29 @@ void main() {
   ctx = canvas.getContext('2d');
   new Game().run();
 }
+enum GameState {
+  IDLE,
+  ROTATING_HALF,
+  ROTATING_FULL,
+}
 
 class Game {
-  // smaller numbers make the game run faster
-  static const num GAME_SPEED = 50;
-
-  num _lastTimeStamp = 0;
-
-  Stage _stage;
+  GameState state = GameState.IDLE;
+  GameTimer timer;
+  Stage stage;
 
   Game() {
-    print(canvas.width);
-    print(canvas.height);
-    // canvas.width;
-    // canvas.height;
+    // print(canvas.width);
+    // print(canvas.height);
     init();
   }
 
   void init() {
     Cell.ctx = ctx;
-    canvas.onClick.listen(onMouseClick);
-    _stage = Stage(Point(canvas.width / 2, canvas.height / 2), 100);
+    canvas.onMouseDown.listen(onMouseDown);
+    canvas.onMouseUp.listen(onMouseUp);
+    timer = GameTimer(0);
+    stage = Stage(Point(canvas.width / 2, canvas.height / 2), 100);
   }
 
   Future run() async {
@@ -41,31 +44,41 @@ class Game {
       update(await window.animationFrame);
   }
 
+  onMouseUp(MouseEvent me){}
 
-
-  onMouseClick(MouseEvent me)
+  onMouseDown(MouseEvent me)
   {
+    if (me.button != 0 || state != GameState.IDLE)
+      return ;
+
+    var rect = canvas.getBoundingClientRect();
+    var x = me.client.x - rect.left;
+    // var y = me.client.y - rect.top;
+
+    var multiplier = (x >= canvas.width / 2) ? 1 : -1;
+
+    coroutines.add(TimeoutCoroutine(() {
+      stage.rotate(0.01 * multiplier);
+      return (false);
+    }, timer, 190));
 
     print("click me!");
   }
 
-  // List<Function(Game g, num delta)> coroutines = [];
+  List<Coroutine> coroutines = [];
 
-  void update(num delta) {
-    final num diff = delta - _lastTimeStamp;
+  // dart's animationFrame automatically lock 60 fps
+  void update(num time) {
+    timer.currentTime = time;
 
-    if (diff > GAME_SPEED) {
-      _lastTimeStamp = delta;
+    // invoke coroutines
+    // remove completed
+    coroutines.removeWhere((coroutine) => coroutine.execute());
 
-      // coroutines?.forEach((function) => function(this, _lastTimeStamp));
-
-
-      clear();
-      _stage.rotate(0.01);
-      _stage.draw();
-    }
-
-
+    // main draw section
+    clear();
+    // stage.rotate(0.01);
+    stage.draw();
   }
 
   void clear() {
