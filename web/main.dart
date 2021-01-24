@@ -8,29 +8,11 @@ const int CELL_SIZE = 10;
 
 CanvasElement canvas;
 CanvasRenderingContext2D ctx;
-Keyboard keyboard = new Keyboard();
 
 void main() {
   canvas = querySelector('#canvas')..focus();
   ctx = canvas.getContext('2d');
-
-  new Game()..run();
-}
-
-void drawCell(Point coords, String color) {
-  ctx..fillStyle = color
-    ..strokeStyle = "white";
-
-  final int x = coords.x * CELL_SIZE;
-  final int y = coords.y * CELL_SIZE;
-
-  ctx..fillRect(x, y, CELL_SIZE, CELL_SIZE)
-    ..strokeRect(x, y, CELL_SIZE, CELL_SIZE);
-}
-
-void clear() {
-  ctx..fillStyle = "white"
-    ..fillRect(0, 0, canvas.width, canvas.height);
+  new Game().run();
 }
 
 class Game {
@@ -63,7 +45,13 @@ class Game {
     if (diff > GAME_SPEED) {
       _lastTimeStamp = delta;
       clear();
-      _cell.draw("red");
+      _cell.rotate(0.01);
+      _cell.draw();
     }
+  }
+
+  void clear() {
+    ctx..fillStyle = "white"
+      ..fillRect(0, 0, canvas.width, canvas.height);
   }
 }

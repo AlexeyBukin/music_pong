@@ -2,39 +2,53 @@ import 'dart:html';
 import 'dart:math';
 
 class Cell {
+  static const int topLeft = 0;
+  static const int topRight = 1;
+  static const int bottomRight = 2;
+  static const int bottomLeft = 3;
+
   static CanvasRenderingContext2D ctx;
 
-  Point topLeft, topRight, bottomRight, bottomLeft, center, origin;
-  num rotation;
+  Point center, origin;
+  List<Point> points = List.filled(4, Point(0, 0));
+  String color;
+  num rotationAngle = 0, size;
 
-  Cell(this.center, num size, {this.origin, this.rotation = 0}) {
+  set rotation(num angle) => this..init()..rotate(angle);
+
+  Cell(this.center, this.size, {this.origin, rotation = 0, this.color = "red"}) {
     origin ??= center;
-    var halfsize = size / 2;
-    topLeft = Point(center.x - halfsize, center.y - halfsize);
-    topRight = Point(center.x + halfsize, center.y - halfsize);
-    bottomRight = Point(center.x + halfsize, center.y + halfsize);
-    bottomLeft = Point(center.x - halfsize, center.y + halfsize);
+    this.rotation = rotation;
   }
 
-  draw(String color) {
+  init() {
+    rotationAngle = 0;
+    var halfsize = size / 2;
+    points[topLeft] = Point(center.x - halfsize, center.y - halfsize);
+    points[topRight] = Point(center.x + halfsize, center.y - halfsize);
+    points[bottomRight] = Point(center.x + halfsize, center.y + halfsize);
+    points[bottomLeft] = Point(center.x - halfsize, center.y + halfsize);
+  }
 
+  draw() {
     ctx..fillStyle = color
-      ..strokeStyle = "red";
-
+      ..strokeStyle = color;
     ctx.beginPath();
-    ctx.moveTo(topLeft.x, topLeft.y);
-    ctx.lineTo(topRight.x, topRight.y);
-    ctx.lineTo(bottomRight.x, bottomRight.y);
-    ctx.lineTo(bottomLeft.x, bottomLeft.y);
+    ctx.moveTo(points[topLeft].x, points[topLeft].y);
+    ctx.lineTo(points[topRight].x, points[topRight].y);
+    ctx.lineTo(points[bottomRight].x, points[bottomRight].y);
+    ctx.lineTo(points[bottomLeft].x, points[bottomLeft].y);
     ctx.fill();
+  }
 
-    // var tx = x - size / 2;
-    // var ty = y - size / 2;
-    // ctx.translate(x, y);
-    // ctx.rotate(rotation);
-    //
-    // ctx.fillRect(tx, ty, size, size);
-    // ctx.rotate(-rotation);
-    // ctx.translate(-x, -y);
+  rotate(num angle) {
+    rotationAngle += angle;
+    var s = sin(angle);
+    var c = cos(angle);
+    points = points.map((Point point) {
+      point -= origin;
+      point = Point(point.x * c - point.y * s, point.x * s + point.y * c);
+      return point + origin;
+    }).toList();
   }
 }
