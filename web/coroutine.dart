@@ -20,9 +20,5 @@ class TimeoutCoroutine extends Coroutine {
       : super(task) { creationTime = gameTimer.currentTime; }
 
   @override
-  bool execute() {
-    if (task() || gameTimer.isTimeout(creationTime + timeout))
-      return true;
-    return false;
-  }
+  bool execute() => (task() || gameTimer.isTimeout(creationTime + timeout));
 }
