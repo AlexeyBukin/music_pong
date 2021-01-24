@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 import 'dart:collection';
+import 'stage.dart';
 
 const int CELL_SIZE = 10;
 
@@ -15,26 +16,6 @@ void main() {
 
   new Game()..run();
 }
-
-class Cell {
-
-  double x = 0, y = 0, size = 100, rotation = 0;
-
-  Cell(this.x, this.y, this.size, {this.rotation});
-
-  draw(String color) {
-    var tx = x - size / 2;
-    var ty = y - size / 2;
-    ctx.translate(x, y);
-    ctx.rotate(rotation);
-    ctx..fillStyle = color
-      ..strokeStyle = "red";
-    ctx.fillRect(tx, ty, size, size);
-    ctx.rotate(-rotation);
-    ctx.translate(-x, -y);
-  }
-}
-
 
 void drawCell(Point coords, String color) {
   ctx..fillStyle = color
@@ -58,51 +39,22 @@ class Game {
 
   num _lastTimeStamp = 0;
 
-  // a few convenience variables to simplify calculations
-  int _rightEdgeX;
-  int _bottomEdgeY;
-
-  Snake _snake;
-  Point _food;
   Cell _cell;
 
   Game() {
-    _rightEdgeX = canvas.width ~/ CELL_SIZE;
-    _bottomEdgeY = canvas.height ~/ CELL_SIZE;
-
+    // canvas.width;
+    // canvas.height;
     init();
   }
 
-  void a(int a, int b, {int c = 2, int d = 3}){}
-
   void init() {
-    _cell = new Cell(100, 100, 100, rotation : (pi / 180 * 45));
-    _snake = new Snake();
-    _food = _randomPoint();
-  }
-
-  Point _randomPoint() {
-    Random random = new Random();
-    return new Point(random.nextInt(_rightEdgeX), random.nextInt(_bottomEdgeY));
-  }
-
-  void _checkForCollisions() {
-    // check for collision with food
-    if (_snake.head == _food) {
-      _snake.grow();
-      _food = _randomPoint();
-    }
-
-    // check death conditions
-    if (_snake.head.x <= -1 || _snake.head.x >= _rightEdgeX ||
-    _snake.head.y <= -1 || _snake.head.y >= _bottomEdgeY ||
-    _snake.checkForBodyCollision()) {
-      init();
-    }
+    Cell.ctx = ctx;
+    _cell = new Cell(Point(100, 100), 100, rotation : (pi / 180 * 45));
   }
 
   Future run() async {
-    update(await window.animationFrame);
+    while (true)
+      update(await window.animationFrame);
   }
 
   void update(num delta) {
@@ -111,100 +63,7 @@ class Game {
     if (diff > GAME_SPEED) {
       _lastTimeStamp = delta;
       clear();
-      drawCell(_food, "blue");
-      _snake.update();
-      _checkForCollisions();
       _cell.draw("red");
     }
-
-    // keep looping
-    run();
   }
-}
-
-class Snake {
-  static const Point LEFT = const Point(-1, 0);
-  static const Point RIGHT = const Point(1, 0);
-  static const Point UP = const Point(0, -1);
-  static const Point DOWN = const Point(0, 1);
-
-  static const int START_LENGTH = 6;
-
-  List<Point> _body;        // coordinates of the body segments
-  Point _dir = RIGHT;       // current travel direction
-
-  Snake() {
-    int i = START_LENGTH - 1;
-    _body = new List<Point>.generate(START_LENGTH, (int index) => new Point(i--, 0));
-  }
-
-  Point get head => _body.first;
-
-  void _checkInput() {
-    if (keyboard.isPressed(KeyCode.LEFT) && _dir != RIGHT) {
-      _dir = LEFT;
-    }
-    else if (keyboard.isPressed(KeyCode.RIGHT) && _dir != LEFT) {
-      _dir = RIGHT;
-    }
-    else if (keyboard.isPressed(KeyCode.UP) && _dir != DOWN) {
-      _dir = UP;
-    }
-    else if (keyboard.isPressed(KeyCode.DOWN) && _dir != UP) {
-      _dir = DOWN;
-    }
-  }
-
-  void grow() {
-    // add new head based on current direction
-    _body.insert(0, head + _dir);
-  }
-
-  void _move() {
-    // add a new head segment
-    grow();
-
-    // remove the tail segment
-    _body.removeLast();
-  }
-
-  void _draw() {
-    // starting with the head, draw each body segment
-    for (Point p in _body) {
-      drawCell(p, "green");
-    }
-  }
-
-  bool checkForBodyCollision() {
-    for (Point p in _body.skip(1)) {
-      if (p == head) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  void update() {
-    _checkInput();
-    _move();
-    _draw();
-  }
-}
-
-class Keyboard {
-  //TODO add second state
-  HashMap<int, num> _keys = new HashMap<int, num>();
-
-  Keyboard() {
-    window.onKeyDown.listen((KeyboardEvent event) {
-      _keys.putIfAbsent(event.keyCode, () => event.timeStamp);
-    });
-
-    window.onKeyUp.listen((KeyboardEvent event) {
-      _keys.remove(event.keyCode);
-    });
-  }
-
-  bool isPressed(int keyCode) => _keys.containsKey(keyCode);
 }
