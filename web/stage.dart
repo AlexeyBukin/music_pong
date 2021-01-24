@@ -52,3 +52,32 @@ class Cell {
     }).toList();
   }
 }
+
+/// Cells in Stage Cell list:
+/// [1] [2] [3]
+/// [4] [5] [6]
+/// [7] [8] [9]
+
+class Stage {
+  static CanvasRenderingContext2D ctx;
+
+  List<Cell> cells = List.filled(9, Cell(Point(0, 0), 100));
+  Point center;
+  num cellSize;
+
+  Stage(this.center, this.cellSize) {
+    var offset = 5;
+    var index = 0;
+    for (var y = -1; y <= 1; y++) {
+      for (var x = -1; x <= 1; x++) {
+        cells[index++] = Cell(center + Point(x * cellSize + (x * offset), y * cellSize +  (y * offset)), cellSize, origin: center);
+      }
+    }
+  }
+
+  draw() => cells.forEach((Cell cell) => cell.draw());
+
+  rotate(num angle) => cells.forEach((Cell cell) => cell.rotate(angle));
+
+  set rotation(num angle) => cells.forEach((Cell cell) => cell.rotation = angle);
+}

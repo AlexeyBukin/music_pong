@@ -4,8 +4,7 @@ import 'dart:math';
 import 'dart:collection';
 import 'stage.dart';
 
-const int CELL_SIZE = 10;
-
+// typedef Coroutine = Pair<Function(num delta, Object o), dynamic>;
 CanvasElement canvas;
 CanvasRenderingContext2D ctx;
 
@@ -21,9 +20,11 @@ class Game {
 
   num _lastTimeStamp = 0;
 
-  Cell _cell;
+  Stage _stage;
 
   Game() {
+    print(canvas.width);
+    print(canvas.height);
     // canvas.width;
     // canvas.height;
     init();
@@ -31,7 +32,8 @@ class Game {
 
   void init() {
     Cell.ctx = ctx;
-    _cell = new Cell(Point(100, 100), 100, rotation : (pi / 180 * 45));
+    canvas.onClick.listen(onMouseClick);
+    _stage = Stage(Point(canvas.width / 2, canvas.height / 2), 100);
   }
 
   Future run() async {
@@ -39,19 +41,35 @@ class Game {
       update(await window.animationFrame);
   }
 
+
+
+  onMouseClick(MouseEvent me)
+  {
+
+    print("click me!");
+  }
+
+  // List<Function(Game g, num delta)> coroutines = [];
+
   void update(num delta) {
     final num diff = delta - _lastTimeStamp;
 
     if (diff > GAME_SPEED) {
       _lastTimeStamp = delta;
+
+      // coroutines?.forEach((function) => function(this, _lastTimeStamp));
+
+
       clear();
-      _cell.rotate(0.01);
-      _cell.draw();
+      _stage.rotate(0.01);
+      _stage.draw();
     }
+
+
   }
 
   void clear() {
-    ctx..fillStyle = "white"
+    ctx..fillStyle = "rgb(220,220,220)"
       ..fillRect(0, 0, canvas.width, canvas.height);
   }
 }

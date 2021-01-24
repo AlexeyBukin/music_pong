@@ -4,9 +4,3 @@ html, body {
   margin: 0;
   padding: 0;
 }
-
-#wrapper {
-  width: 450px;
-  margin: auto;
-  border: solid thin black;
-}
