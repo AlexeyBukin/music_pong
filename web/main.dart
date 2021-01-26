@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
-import 'dart:collection';
 import 'coroutine.dart';
 import 'stage.dart';
 import 'game_timer.dart';
@@ -33,9 +32,10 @@ class Game {
 
   void init() {
     Cell.ctx = ctx;
+    timer = GameTimer(0);
+    Coroutine.gameTimer = timer;
     canvas.onMouseDown.listen(onMouseDown);
     canvas.onMouseUp.listen(onMouseUp);
-    timer = GameTimer(0);
     stage = Stage(Point(canvas.width / 2, canvas.height / 2), 100);
   }
 
@@ -46,6 +46,7 @@ class Game {
 
   onMouseUp(MouseEvent me){}
 
+  //TODO implement State Machine
   onMouseDown(MouseEvent me)
   {
     if (me.button != 0 || state != GameState.IDLE)
@@ -57,12 +58,9 @@ class Game {
 
     var multiplier = (x >= canvas.width / 2) ? 1 : -1;
 
-    coroutines.add(TimeoutCoroutine(() {
-      stage.rotate(0.01 * multiplier);
-      return (false);
-    }, timer, 190));
-
-    print("click me!");
+    coroutines.add(
+      RotateCoroutine(stage, targetAngle: (pi / 2), rotationSpeed: 0.002 * multiplier)
+    );
   }
 
   List<Coroutine> coroutines = [];
