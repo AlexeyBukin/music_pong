@@ -1,5 +1,5 @@
 import 'game_timer.dart';
-
+import 'package:meta/meta.dart';
 /// execute() method should return bool value 'isCompleted'
 // basic coroutine that never dies
 abstract class Coroutine {
@@ -8,7 +8,7 @@ abstract class Coroutine {
 
   bool Function() task = () => false;
 
-  Coroutine(this.task);
+  Coroutine({this.task});
 
   bool execute() => task();
 }
@@ -18,7 +18,7 @@ class TimeoutCoroutine extends Coroutine {
   num timeout;
 
   TimeoutCoroutine(bool Function() task,  this.timeout)
-      : super(task) {
+      : super(task : task) {
     creationTime = Coroutine.gameTimer.currentTime;
   }
 
@@ -26,32 +26,43 @@ class TimeoutCoroutine extends Coroutine {
   bool execute() => (task() || Coroutine.gameTimer.isTimeout(creationTime + timeout));
 }
 
-// rotation speed can be negative => rotation left
-class RotateCoroutine extends Coroutine {
+class ValueCoroutine extends Coroutine {
   num creationTime;
-  dynamic rotateMe;
-  num rotationSpeed = 0;
-  num currentAngle = 0;
-  num targetAngle = 0;
+  void Function(num) action;
+  num speed = 0;
+  num current = 0;
+  num target = 0;
+  bool isPositive;
 
-  RotateCoroutine(this.rotateMe, {this.targetAngle, this.rotationSpeed, bool Function() task})
-      : super(task) {
-    task ??= rotateTask;
-    targetAngle = targetAngle.abs();
+  ValueCoroutine({@required this.action, this.target, this.speed, this.isPositive = true, bool Function() customTask = null}) {
+    customTask ??= (isPositive ? valueTaskPositive : valueTaskNegative);
+    task = customTask;
+    if (isPositive == false) {
+      target *= -1;
+      speed *= -1;
+    }
     creationTime = Coroutine.gameTimer.currentTime;
   }
 
-  bool rotateTask() {
-    var rotateAngle = rotationSpeed * Coroutine.gameTimer.delta;
-    currentAngle += rotateAngle.abs();
-    rotateMe.rotate(rotateAngle);
-    if (currentAngle > targetAngle) {
-      rotateMe.rotate((targetAngle - currentAngle) * rotationSpeed.sign);
+  bool valueTaskPositive() {
+    var valueDelta = speed * Coroutine.gameTimer.delta;
+    action(valueDelta);
+    current += valueDelta;
+    if (current > target) {
+      action(target - current);
       return true;
     }
     return false;
   }
 
-  @override
-  bool execute() => (task == null ? rotateTask() : task());
+  bool valueTaskNegative() {
+    var valueDelta = speed * Coroutine.gameTimer.delta;
+    action(valueDelta);
+    current += valueDelta;
+    if (current < target) {
+      action(target - current);
+      return true;
+    }
+    return false;
+  }
 }

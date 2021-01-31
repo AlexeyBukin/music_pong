@@ -57,9 +57,14 @@ class Game {
     // var y = me.client.y - rect.top;
 
     var multiplier = (x >= canvas.width / 2) ? 1 : -1;
-
+    print('added coroutine with isPositive = ${x >= canvas.width / 2}');
     coroutines.add(
-      RotateCoroutine(stage, targetAngle: (pi / 2), rotationSpeed: 0.002 * multiplier)
+      ValueCoroutine(
+          action: stage.rotate,
+          target: (pi / 2),
+          speed: 0.002,
+          isPositive: (x >= canvas.width / 2))
+      // RotateCoroutine(stage, targetAngle: (pi / 2), rotationSpeed: 0.002 * multiplier)
     );
   }
 
