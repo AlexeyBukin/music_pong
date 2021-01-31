@@ -2,29 +2,36 @@ import 'game_timer.dart';
 import 'package:meta/meta.dart';
 /// execute() method should return bool value 'isCompleted'
 // basic coroutine that never dies
-abstract class Coroutine {
+class Coroutine {
 
   static GameTimer gameTimer;
 
+  void Function() onComplete = () {};
   bool Function() task = () => false;
 
-  Coroutine({this.task});
+  Coroutine({this.task, this.onComplete});
 
-  bool execute() => task();
-}
-
-class TimeoutCoroutine extends Coroutine {
-  num creationTime;
-  num timeout;
-
-  TimeoutCoroutine(bool Function() task,  this.timeout)
-      : super(task : task) {
-    creationTime = Coroutine.gameTimer.currentTime;
+  bool execute() {
+    if (task() == true) {
+      onComplete(); return true;
+    }
+    return false;
   }
-
-  @override
-  bool execute() => (task() || Coroutine.gameTimer.isTimeout(creationTime + timeout));
 }
+
+// class TimeoutCoroutine extends Coroutine {
+//   num creationTime;
+//   num timeout;
+//
+//   TimeoutCoroutine(bool Function() task,  this.timeout)
+//       : super(task : task) {
+//     creationTime = Coroutine.gameTimer.currentTime;
+//   }
+//
+//   @override
+//   bool execute() => (task() || Coroutine.gameTimer.isTimeout(creationTime + timeout));
+// }
+void doNothing(num a){}
 
 class ValueCoroutine extends Coroutine {
   num creationTime;
@@ -34,8 +41,14 @@ class ValueCoroutine extends Coroutine {
   num target = 0;
   bool isPositive;
 
-  ValueCoroutine({@required this.action, this.target, this.speed, this.isPositive = true, bool Function() customTask = null}) {
-    customTask ??= (isPositive ? valueTaskPositive : valueTaskNegative);
+  ValueCoroutine({this.action = null, this.target,
+    this.speed, num start = 0, this.isPositive = true, bool Function() customTask = null,
+    void Function() onComplete}) {
+    current = start;
+    action ??= doNothing;
+    customTask ??= valueTask;//(isPositive ? valueTaskPositive : valueTaskNegative);
+    if (onComplete != null)
+      super.onComplete = onComplete;
     task = customTask;
     if (isPositive == false) {
       target *= -1;
@@ -44,22 +57,11 @@ class ValueCoroutine extends Coroutine {
     creationTime = Coroutine.gameTimer.currentTime;
   }
 
-  bool valueTaskPositive() {
+  bool valueTask() {
     var valueDelta = speed * Coroutine.gameTimer.delta;
     action(valueDelta);
     current += valueDelta;
-    if (current > target) {
-      action(target - current);
-      return true;
-    }
-    return false;
-  }
-
-  bool valueTaskNegative() {
-    var valueDelta = speed * Coroutine.gameTimer.delta;
-    action(valueDelta);
-    current += valueDelta;
-    if (current < target) {
+    if ((isPositive && current > target) || (!isPositive && current < target)) {
       action(target - current);
       return true;
     }

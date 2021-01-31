@@ -44,31 +44,55 @@ class Game {
       update(await window.animationFrame);
   }
 
-  onMouseUp(MouseEvent me){}
+  bool isMouseDown = false;
+
+  onMouseUp(MouseEvent me){isMouseDown = false;}
 
   //TODO implement State Machine
   onMouseDown(MouseEvent me)
   {
+    isMouseDown = true;
+
     if (me.button != 0 || state != GameState.IDLE)
       return ;
 
     var rect = canvas.getBoundingClientRect();
     var x = me.client.x - rect.left;
-    // var y = me.client.y - rect.top;
 
-    var multiplier = (x >= canvas.width / 2) ? 1 : -1;
-    print('added coroutine with isPositive = ${x >= canvas.width / 2}');
+    state = GameState.ROTATING_HALF;
+    addPlannedRotate45() {
+
+    }
     coroutines.add(
       ValueCoroutine(
-          action: stage.rotate,
-          target: (pi / 2),
-          speed: 0.002,
-          isPositive: (x >= canvas.width / 2))
-      // RotateCoroutine(stage, targetAngle: (pi / 2), rotationSpeed: 0.002 * multiplier)
+        action: stage.rotate,
+        target: (pi / 4),
+        speed: 0.002,
+        isPositive: (x >= canvas.width / 2),
+        onComplete: () {
+          state = GameState.ROTATING_FULL;
+          planned.add(
+              Coroutine(
+                  task: (){return !isMouseDown;},
+                  onComplete: () {
+                    planned.add(
+                        ValueCoroutine(
+                          action: stage.rotate,
+                          target: (pi / 4),
+                          speed: 0.002,
+                          isPositive: (x >= canvas.width / 2),
+                          onComplete: () { state = GameState.IDLE; },
+                    )
+                );
+              })
+          );
+        },
+      )
     );
   }
 
   List<Coroutine> coroutines = [];
+  List<Coroutine> planned = [];
 
   // dart's animationFrame automatically lock 60 fps
   void update(num time) {
@@ -76,7 +100,8 @@ class Game {
 
     // invoke coroutines
     // remove completed
-    coroutines.removeWhere((coroutine) => coroutine.execute());
+    coroutines..removeWhere((coroutine) => coroutine.execute())..addAll(planned);
+    planned.clear();
 
     // main draw section
     clear();
