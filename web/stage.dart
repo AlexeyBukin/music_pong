@@ -59,6 +59,7 @@ class Cell {
 /// [7] [8] [9]
 
 class Stage {
+  static int offset = 5;
   static CanvasRenderingContext2D ctx;
 
   List<Cell> cells = List.filled(9, Cell(Point(0, 0), 100));
@@ -66,11 +67,13 @@ class Stage {
   num cellSize;
 
   Stage(this.center, this.cellSize) {
-    var offset = 5;
     var index = 0;
     for (var y = -1; y <= 1; y++) {
       for (var x = -1; x <= 1; x++) {
-        cells[index++] = Cell(center + Point(x * cellSize + (x * offset), y * cellSize +  (y * offset)), cellSize, origin: center);
+        cells[index++] = Cell(
+            center + Point(x * cellSize + (x * offset), y * cellSize +  (y * offset)),
+            cellSize,
+            origin: center);
       }
     }
   }

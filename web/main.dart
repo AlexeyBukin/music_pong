@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 import 'coroutine.dart';
+import 'emitter.dart';
 import 'stage.dart';
 import 'game_timer.dart';
 
@@ -23,6 +24,8 @@ class Game {
   GameState state = GameState.IDLE;
   GameTimer timer;
   Stage stage;
+  List<Emitter> emitters = [];
+  List<Disc> discs = [];
 
   Game() {
     // print(canvas.width);
@@ -36,7 +39,10 @@ class Game {
     Coroutine.gameTimer = timer;
     canvas.onMouseDown.listen(onMouseDown);
     canvas.onMouseUp.listen(onMouseUp);
-    stage = Stage(Point(canvas.width / 2, canvas.height / 2), 100);
+    stage = Stage(Point(canvas.width / 2, canvas.height - 200), 100);
+    emitters.add(Emitter(Point(canvas.width / 2 - 105, 10), 100, Point(canvas.width / 2 - 105, canvas.height)));
+    emitters.add(Emitter(Point(canvas.width / 2, 10), 100, Point(canvas.width / 2, canvas.height)));
+    emitters.add(Emitter(Point(canvas.width / 2 + 105, 10), 100, Point(canvas.width / 2 + 105, canvas.height)));
   }
 
   Future run() async {
@@ -48,7 +54,6 @@ class Game {
 
   onMouseUp(MouseEvent me){isMouseDown = false;}
 
-  //TODO implement State Machine
   onMouseDown(MouseEvent me)
   {
     isMouseDown = true;
@@ -60,14 +65,12 @@ class Game {
     var x = me.client.x - rect.left;
 
     state = GameState.ROTATING_HALF;
-    addPlannedRotate45() {
 
-    }
     coroutines.add(
       ValueCoroutine(
         action: stage.rotate,
         target: (pi / 4),
-        speed: 0.002,
+        speed: 0.007,
         isPositive: (x >= canvas.width / 2),
         onComplete: () {
           state = GameState.ROTATING_FULL;
@@ -79,7 +82,7 @@ class Game {
                         ValueCoroutine(
                           action: stage.rotate,
                           target: (pi / 4),
-                          speed: 0.002,
+                          speed: 0.007,
                           isPositive: (x >= canvas.width / 2),
                           onComplete: () { state = GameState.IDLE; },
                     )
@@ -106,6 +109,7 @@ class Game {
     // main draw section
     clear();
     // stage.rotate(0.01);
+    emitters.forEach((emitter) => emitter.draw());
     stage.draw();
   }
 
