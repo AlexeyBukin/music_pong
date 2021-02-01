@@ -25,7 +25,7 @@ class Game {
   GameTimer timer;
   Stage stage;
   List<Emitter> emitters = [];
-  List<Disc> discs = [];
+  // List<Disc> discs = [];
 
   Game() {
     // print(canvas.width);

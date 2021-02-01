@@ -35,18 +35,18 @@ class Emitter extends Cell {
   }
 }
 
-class Disc {
-
-  Point position = Point(0, 0);
-  Point direction = Point(1, 1);
-  num radius = 5;
-
-  Disc(this.position, this.direction, this.radius);
-
-  draw() {
-    Cell.ctx.beginPath();
-    Cell.ctx.arc(position.x, position.y, radius, 0, pi);
-    Cell.ctx.fill();
-  }
-}
+// class Disc {
+//
+//   Point position = Point(0, 0);
+//   Point direction = Point(1, 1);
+//   num radius = 5;
+//
+//   Disc(this.position, this.direction, this.radius);
+//
+//   draw() {
+//     Cell.ctx.beginPath();
+//     Cell.ctx.arc(position.x, position.y, radius, 0, pi);
+//     Cell.ctx.fill();
+//   }
+// }
 
