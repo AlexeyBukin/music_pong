@@ -10,8 +10,8 @@ class GameTimer {
   get currentTime => _currentTime;
 
   set currentTime(num val) {
-   _delta = val - _currentTime;
-   _currentTime = val;
+    _delta = val - _currentTime;
+    _currentTime = val;
   }
 
   get delta => _delta;

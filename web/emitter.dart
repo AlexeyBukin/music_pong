@@ -3,7 +3,6 @@ import 'dart:math';
 import 'stage.dart';
 
 class Emitter extends Cell {
-
   static const int rayTip = 4;
   Point rayTipOffset;
   String rayColor;
@@ -12,7 +11,7 @@ class Emitter extends Cell {
   List<Point> points = List.filled(5, Point(0, 0));
 
   Emitter(Point eCenter, num eSize, this.rayTipOffset, {this.rayColor})
-    : super (eCenter, eSize) {
+      : super(eCenter, eSize) {
     rayColor ??= 'black';
   }
 
@@ -24,7 +23,8 @@ class Emitter extends Cell {
 
   @override
   draw() {
-    Cell.ctx..fillStyle = rayColor
+    Cell.ctx
+      ..fillStyle = rayColor
       ..strokeStyle = rayColor
       ..lineWidth = 10;
     Cell.ctx.beginPath();
@@ -49,4 +49,3 @@ class Emitter extends Cell {
 //     Cell.ctx.fill();
 //   }
 // }
-

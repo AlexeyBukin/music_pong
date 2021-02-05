@@ -14,6 +14,7 @@ void main() {
   ctx = canvas.getContext('2d');
   new Game().run();
 }
+
 enum GameState {
   IDLE,
   ROTATING_HALF,
@@ -25,6 +26,7 @@ class Game {
   GameTimer timer;
   Stage stage;
   List<Emitter> emitters = [];
+
   // List<Disc> discs = [];
 
   Game() {
@@ -37,62 +39,95 @@ class Game {
     Cell.ctx = ctx;
     timer = GameTimer(0);
     Coroutine.gameTimer = timer;
-    canvas.onMouseDown.listen(onMouseDown);
-    canvas.onMouseUp.listen(onMouseUp);
+    // canvas.onMouseDown.listen(onMouseDown);
+    // canvas.onMouseUp.listen(onMouseUp);
+
+    window.onKeyDown.listen(onKeyDown);
+    window.onKeyUp.listen(onKeyUp);
     stage = Stage(Point(canvas.width / 2, canvas.height - 200), 100);
-    emitters.add(Emitter(Point(canvas.width / 2 - 105, 10), 100, Point(canvas.width / 2 - 105, canvas.height)));
-    emitters.add(Emitter(Point(canvas.width / 2, 10), 100, Point(canvas.width / 2, canvas.height)));
-    emitters.add(Emitter(Point(canvas.width / 2 + 105, 10), 100, Point(canvas.width / 2 + 105, canvas.height)));
+    emitters.add(Emitter(Point(canvas.width / 2 - 105, 10), 100,
+        Point(canvas.width / 2 - 105, canvas.height)));
+    emitters.add(Emitter(Point(canvas.width / 2, 10), 100,
+        Point(canvas.width / 2, canvas.height)));
+    emitters.add(Emitter(Point(canvas.width / 2 + 105, 10), 100,
+        Point(canvas.width / 2 + 105, canvas.height)));
   }
 
   Future run() async {
-    while (true)
-      update(await window.animationFrame);
+    while (true) update(await window.animationFrame);
   }
 
-  bool isMouseDown = false;
+  bool isActiveArrowDown = false;
+  int activeArrow = 0;
 
-  onMouseUp(MouseEvent me){isMouseDown = false;}
+  // TODO refactor this shit
+  void onKeyDown(KeyboardEvent event) {
+    if (isActiveArrowDown || state != GameState.IDLE) return;
+    if (event.keyCode == KeyCode.LEFT) {
+      activeArrow = KeyCode.LEFT;
+    } else if (event.keyCode == KeyCode.RIGHT) {
+      activeArrow = KeyCode.RIGHT;
+    } else {
+      return;
+    }
+    isActiveArrowDown = true;
+    startRotateCoroutine(event.keyCode == KeyCode.RIGHT);
+  }
 
-  onMouseDown(MouseEvent me)
-  {
-    isMouseDown = true;
+  void onKeyUp(KeyboardEvent event) {
+    if (event.keyCode == activeArrow) isActiveArrowDown = false;
+  }
 
-    if (me.button != 0 || state != GameState.IDLE)
-      return ;
+  num rotationSpeed = 0.007;
 
-    var rect = canvas.getBoundingClientRect();
-    var x = me.client.x - rect.left;
-
+  startRotateCoroutine(bool isRightSideRotation) {
     state = GameState.ROTATING_HALF;
-
     coroutines.add(
       ValueCoroutine(
         action: stage.rotate,
         target: (pi / 4),
-        speed: 0.007,
-        isPositive: (x >= canvas.width / 2),
+        speed: rotationSpeed,
+        isPositive: isRightSideRotation,
         onComplete: () {
           state = GameState.ROTATING_FULL;
           planned.add(
-              Coroutine(
-                  task: (){return !isMouseDown;},
+            Coroutine(task: () {
+              return !isActiveArrowDown;
+            }, onComplete: () {
+              planned.add(
+                ValueCoroutine(
+                  action: stage.rotate,
+                  target: (pi / 4),
+                  speed: rotationSpeed,
+                  isPositive: isRightSideRotation,
                   onComplete: () {
-                    planned.add(
-                        ValueCoroutine(
-                          action: stage.rotate,
-                          target: (pi / 4),
-                          speed: 0.007,
-                          isPositive: (x >= canvas.width / 2),
-                          onComplete: () { state = GameState.IDLE; },
-                    )
-                );
-              })
+                    state = GameState.IDLE;
+                  },
+                ),
+              );
+            }),
           );
         },
-      )
+      ),
     );
   }
+
+  // bool isMouseDown = false;
+
+  // onMouseUp(MouseEvent me) {
+  //   isMouseDown = false;
+  // }
+  //
+  // onMouseDown(MouseEvent me) {
+  //   isMouseDown = true;
+  //
+  //   if (me.button != 0 || state != GameState.IDLE) return;
+  //
+  //   var rect = canvas.getBoundingClientRect();
+  //   var x = me.client.x - rect.left;
+  //
+  //   state = GameState.ROTATING_HALF;
+  // }
 
   List<Coroutine> coroutines = [];
   List<Coroutine> planned = [];
@@ -103,7 +138,9 @@ class Game {
 
     // invoke coroutines
     // remove completed
-    coroutines..removeWhere((coroutine) => coroutine.execute())..addAll(planned);
+    coroutines
+      ..removeWhere((coroutine) => coroutine.execute())
+      ..addAll(planned);
     planned.clear();
 
     // main draw section
@@ -114,7 +151,8 @@ class Game {
   }
 
   void clear() {
-    ctx..fillStyle = "rgb(220,220,220)"
+    ctx
+      ..fillStyle = "rgb(220,220,220)"
       ..fillRect(0, 0, canvas.width, canvas.height);
   }
 }

@@ -14,24 +14,28 @@ class Cell {
   String color;
   num rotationAngle = 0, size;
 
-  set rotation(num angle) => this..init()..rotate(angle);
+  set rotation(num angle) => this
+    ..init()
+    ..rotate(angle);
 
-  Cell(this.center, this.size, {this.origin, rotation = 0, this.color = "red"}) {
+  Cell(this.center, this.size,
+      {this.origin, rotation = 0, this.color = "red"}) {
     origin ??= center;
     this.rotation = rotation;
   }
 
   init() {
     rotationAngle = 0;
-    var halfsize = size / 2;
-    points[topLeft] = Point(center.x - halfsize, center.y - halfsize);
-    points[topRight] = Point(center.x + halfsize, center.y - halfsize);
-    points[bottomRight] = Point(center.x + halfsize, center.y + halfsize);
-    points[bottomLeft] = Point(center.x - halfsize, center.y + halfsize);
+    var halfSize = size / 2;
+    points[topLeft] = Point(center.x - halfSize, center.y - halfSize);
+    points[topRight] = Point(center.x + halfSize, center.y - halfSize);
+    points[bottomRight] = Point(center.x + halfSize, center.y + halfSize);
+    points[bottomLeft] = Point(center.x - halfSize, center.y + halfSize);
   }
 
   draw() {
-    ctx..fillStyle = color
+    ctx
+      ..fillStyle = color
       ..strokeStyle = color;
     ctx.beginPath();
     ctx.moveTo(points[topLeft].x, points[topLeft].y);
@@ -71,7 +75,8 @@ class Stage {
     for (var y = -1; y <= 1; y++) {
       for (var x = -1; x <= 1; x++) {
         cells[index++] = Cell(
-            center + Point(x * cellSize + (x * offset), y * cellSize +  (y * offset)),
+            center +
+                Point(x * cellSize + (x * offset), y * cellSize + (y * offset)),
             cellSize,
             origin: center);
       }
@@ -82,5 +87,6 @@ class Stage {
 
   rotate(num angle) => cells.forEach((Cell cell) => cell.rotate(angle));
 
-  set rotation(num angle) => cells.forEach((Cell cell) => cell.rotation = angle);
+  set rotation(num angle) =>
+      cells.forEach((Cell cell) => cell.rotation = angle);
 }

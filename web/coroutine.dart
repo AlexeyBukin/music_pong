@@ -1,9 +1,9 @@
 import 'game_timer.dart';
-import 'package:meta/meta.dart';
+
 /// execute() method should return bool value 'isCompleted'
 // basic coroutine that never dies
-class Coroutine {
 
+class Coroutine {
   static GameTimer gameTimer;
 
   void Function() onComplete = () {};
@@ -13,25 +13,14 @@ class Coroutine {
 
   bool execute() {
     if (task() == true) {
-      onComplete(); return true;
+      onComplete();
+      return true;
     }
     return false;
   }
 }
 
-// class TimeoutCoroutine extends Coroutine {
-//   num creationTime;
-//   num timeout;
-//
-//   TimeoutCoroutine(bool Function() task,  this.timeout)
-//       : super(task : task) {
-//     creationTime = Coroutine.gameTimer.currentTime;
-//   }
-//
-//   @override
-//   bool execute() => (task() || Coroutine.gameTimer.isTimeout(creationTime + timeout));
-// }
-void doNothing(num a){}
+void doNothing(num a) {}
 
 class ValueCoroutine extends Coroutine {
   num creationTime;
@@ -41,14 +30,18 @@ class ValueCoroutine extends Coroutine {
   num target = 0;
   bool isPositive;
 
-  ValueCoroutine({this.action = null, this.target,
-    this.speed, num start = 0, this.isPositive = true, bool Function() customTask = null,
-    void Function() onComplete}) {
+  ValueCoroutine(
+      {this.action = null,
+      this.target,
+      this.speed,
+      num start = 0,
+      this.isPositive = true,
+      bool Function() customTask = null,
+      void Function() onComplete}) {
     current = start;
     action ??= doNothing;
-    customTask ??= valueTask;//(isPositive ? valueTaskPositive : valueTaskNegative);
-    if (onComplete != null)
-      super.onComplete = onComplete;
+    customTask ??= valueTask;
+    if (onComplete != null) super.onComplete = onComplete;
     task = customTask;
     if (isPositive == false) {
       target *= -1;

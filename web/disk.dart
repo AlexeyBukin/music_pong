@@ -9,27 +9,26 @@ class Disk {
   Disk(this.center, this.radius);
 
   bool isIntersectingCell(Cell c) {
-    if (this.isIntersectingLine(c.points[Cell.topLeft], c.points[Cell.topRight]))
-      return true;
-    if (this.isIntersectingLine(c.points[Cell.topLeft], c.points[Cell.topRight]))
-      return true;
-    if (this.isIntersectingLine(c.points[Cell.topLeft], c.points[Cell.topRight]))
-      return true;
-    if (this.isIntersectingLine(c.points[Cell.topLeft], c.points[Cell.topRight]))
-      return true;
-    if (this.isInsideCell(c))
-      return true;
+    if (this.isIntersectingLine(
+        c.points[Cell.topLeft], c.points[Cell.topRight])) return true;
+    if (this.isIntersectingLine(
+        c.points[Cell.topLeft], c.points[Cell.topRight])) return true;
+    if (this.isIntersectingLine(
+        c.points[Cell.topLeft], c.points[Cell.topRight])) return true;
+    if (this.isIntersectingLine(
+        c.points[Cell.topLeft], c.points[Cell.topRight])) return true;
+    if (this.isInsideCell(c)) return true;
     return false;
   }
 
   num _pointToLineDistance(Point p, Point a, Point b) {
-    double l = (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
-    double pr =(p.x-a.x)*(b.x-a.x)+(p.y-a.y)*(b.y-a.y);
-    double cf = pr/l;
+    double l = (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+    double pr = (p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y);
+    double cf = pr / l;
     cf = cf < 0 ? 0 : cf;
     cf = cf > 1 ? 1 : cf;
-    double resX = a.x+cf*(b.x-a.x);
-    double resY = a.y+cf*(b.y-a.y);
+    double resX = a.x + cf * (b.x - a.x);
+    double resY = a.y + cf * (b.y - a.y);
     return sqrt(resX * resX + resY * resY);
   }
 
@@ -37,13 +36,11 @@ class Disk {
     return (_pointToLineDistance(this.center, a, b) < this.radius);
   }
 
-  num _sideSign (Point p1, Point p2, Point p3)
-  {
+  num _sideSign(Point p1, Point p2, Point p3) {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
   }
 
-  bool _isPointInTriangle (Point pt, Point v1, Point v2, Point v3)
-  {
+  bool _isPointInTriangle(Point pt, Point v1, Point v2, Point v3) {
     num d1, d2, d3;
     bool has_neg, has_pos;
 
@@ -64,6 +61,4 @@ class Disk {
       return true;
     return false;
   }
-
-
 }
